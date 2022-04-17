@@ -22,6 +22,16 @@ def roll_dice(num_rolls, dice=six_sided):
     assert num_rolls > 0, 'Must roll at least once.'
     # BEGIN PROBLEM 1
     "*** YOUR CODE HERE ***"
+    pig = 0
+    result = 0
+    for i in range(num_rolls):
+        d = dice()
+        if d == 1:
+            pig += 1
+        else:
+            result += d
+    return result if pig == 0 else 1
+
     # END PROBLEM 1
 
 
@@ -32,6 +42,18 @@ def piggy_points(score):
     """
     # BEGIN PROBLEM 2
     "*** YOUR CODE HERE ***"
+    sqr = score ** 2
+    min = sqr
+    k = 3
+    def inner(sqr, min):
+        if sqr == 0:
+            return min
+        else:
+            if min > sqr % 10:
+                min = sqr % 10
+            return inner(sqr // 10, min)
+    min = inner(sqr, min)
+    return k + min
     # END PROBLEM 2
 
 
@@ -52,6 +74,11 @@ def take_turn(num_rolls, opponent_score, dice=six_sided, goal=GOAL_SCORE):
     assert opponent_score < goal, 'The game should be over.'
     # BEGIN PROBLEM 3
     "*** YOUR CODE HERE ***"
+    result = 0
+    if num_rolls == 0:
+        return piggy_points(opponent_score)
+    else:
+        return roll_dice(num_rolls, dice)
     # END PROBLEM 3
 
 
@@ -74,6 +101,10 @@ def more_boar(player_score, opponent_score):
     """
     # BEGIN PROBLEM 4
     "*** YOUR CODE HERE ***"
+    if player_score > 100 and opponent_score > 100:
+        player_score = player_score // 10
+        opponent_score = opponent_score // 10
+    return player_score % 10 < opponent_score % 10 and player_score // 10 < opponent_score // 10
     # END PROBLEM 4
 
 
@@ -113,6 +144,21 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
     who = 0  # Who is about to take a turn, 0 (first) or 1 (second)
     # BEGIN PROBLEM 5
     "*** YOUR CODE HERE ***"
+    def round(strategy, player_score, opponent_score):
+        player_score += take_turn(strategy(player_score, opponent_score), opponent_score, dice, goal)
+        if more_boar(player_score, opponent_score):
+            return round(strategy, player_score, opponent_score)
+        else:
+            return player_score
+    
+    while max(score0, score1) < goal:
+        if who == 0:
+            score0 = round(strategy0, score0, score1)
+            who = next_player(who)
+        else:
+            score1 = round(strategy1, score1, score0)
+            who = next_player(who)
+
     # END PROBLEM 5
     # (note that the indentation for the problem 6 prompt (***YOUR CODE HERE***) might be misleading)
     # BEGIN PROBLEM 6
